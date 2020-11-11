@@ -21,5 +21,6 @@ assert() {
 
 assert 0 0 
 assert 42 42
+assert 150 "100+200-200+100-50"
 
 echo "OK"
