@@ -22,5 +22,6 @@ assert() {
 assert 0 0 
 assert 42 42
 assert 150 "100+200-200+100-50"
+assert 60 " 100 + 20 + 30 - 20 - 70"
 
-echo "OK"
+echo "OK : Test ALL Passed"
