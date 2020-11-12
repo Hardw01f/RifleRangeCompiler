@@ -25,6 +25,21 @@ struct Token {
 // declare Token practical used
 Token *token;
 
+char *user_input;
+
+void error_at(char *loc, char *fmt, ...) {
+    va_list ap;
+    va_start(ap, fmt);
+
+    int pol = loc - user_input;
+    fprintf(stderr, "%s\n", user_input);
+    fprintf(stderr, "%*s", pol, "");
+    fprintf(stderr, "^ ");
+    vfprintf(stderr, fmt, ap);
+    fprintf(stderr, "\n");
+    exit(1);
+}
+
 // Func of report error
 void error(char *fmt, ...) {
     va_list ap;
@@ -48,7 +63,7 @@ bool consume(char op) {
 // if it was equal, token value was changed to Next token value
 void expect(char op) {
     if (token->kind != TK_RESERVED || token->str[0] != op)
-       error("Token is NOT '%c'", op);
+       error_at(token->str, "Token is NOT '%c'", op);
     token = token->next;
 }
 
@@ -57,7 +72,7 @@ void expect(char op) {
 // if so, token value was changed to Next token value
 int expect_number() {
     if (token->kind != TK_NUM)
-        error("Not integer value");
+        error_at(token->str, "Not integer value");
     int val = token->val;
     token = token->next;
     return val;
@@ -82,7 +97,8 @@ Token *new_token(TokenKind kind, Token *cur, char *str) {
 // if p is symbol, create new token and consume configured process
 // if p is integer or digit, create new token and store value
 // if p is EOF, return last Linked list head
-Token *tokenize(char *p) {
+Token *tokenize() {
+    char *p = user_input;
     Token head;
     head.next = NULL;
     Token *cur = &head;
@@ -104,7 +120,7 @@ Token *tokenize(char *p) {
             continue;
         }
 
-        error("Unable to tokenize");
+        error_at(p, "Unable to tokenize");
     }
 
     new_token(TK_EOF, cur, p);
@@ -113,7 +129,9 @@ Token *tokenize(char *p) {
 
 int main(int argc, char **argv){
 
-    token = tokenize(argv[1]);
+    user_input = argv[1];
+
+    token = tokenize();
 
 	printf(".intel_syntax noprefix\n");
 	printf(".globl main\n");
