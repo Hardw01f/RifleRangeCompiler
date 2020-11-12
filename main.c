@@ -5,6 +5,7 @@
 #include <stdbool.h>
 #include <string.h>
 
+//represent Inputed Token type
 typedef enum {
     TK_RESERVED, // Symbol
     TK_NUM, //Integer number
@@ -13,6 +14,7 @@ typedef enum {
 
 typedef struct Token Token;
 
+// Token Type struct
 struct Token {
     TokenKind kind; // Token type
     Token *next; // Next inputed token
@@ -20,6 +22,7 @@ struct Token {
     char *str; // String of token
 };
 
+// declare Token practical used
 Token *token;
 
 // Func of report error
@@ -31,6 +34,9 @@ void error(char *fmt, ...) {
     exit(1);
 }
 
+// Check of whether token is equal with op args
+// if it was equal, token value was changed to Next token value and return true
+// if not, return false
 bool consume(char op) {
     if (token->kind != TK_RESERVED || token->str[0] != op)
         return false;
@@ -38,12 +44,17 @@ bool consume(char op) {
     return true;
 }
 
+// Check of whether token is equal with op args
+// if it was equal, token value was changed to Next token value
 void expect(char op) {
     if (token->kind != TK_RESERVED || token->str[0] != op)
        error("Token is NOT '%c'", op);
     token = token->next;
 }
 
+// Check of whether token value is integer
+// if so, store the integer value to token val value and return it
+// if so, token value was changed to Next token value
 int expect_number() {
     if (token->kind != TK_NUM)
         error("Not integer value");
@@ -52,10 +63,12 @@ int expect_number() {
     return val;
 }
 
+// Check of whether token value is EOF
 bool at_eof(){
     return token->kind == TK_EOF;
 }
 
+// Create New Token and bind Next linked List
 Token *new_token(TokenKind kind, Token *cur, char *str) {
     Token *tok = calloc(1, sizeof(Token));
     tok->kind = kind;
@@ -64,6 +77,11 @@ Token *new_token(TokenKind kind, Token *cur, char *str) {
     return tok;
 }
 
+// Tokenize inputed string p 
+// if p is space, skip
+// if p is symbol, create new token and consume configured process
+// if p is integer or digit, create new token and store value
+// if p is EOF, return last Linked list head
 Token *tokenize(char *p) {
     Token head;
     head.next = NULL;
