@@ -114,6 +114,10 @@ Token *tokenize() {
             continue;
         }
 
+        //strtol : convert input to value
+        //p -> Decimal number value (10)
+        //if strtol couldn't convert input, return position of unconvert value
+        //&p -> '+' or '-' or etc
         if (isdigit(*p)) {
             cur = new_token(TK_NUM, cur, p);
             cur->val = strtol(p, &p, 10);
@@ -137,16 +141,6 @@ int main(int argc, char **argv){
 	printf(".globl main\n");
 	printf("main:\n");
 
-    //char *p = argv[1];
-
-    /*
-    //strtol : convert input to value
-    //p -> Decimal number value (10)
-    //if strtol couldn't convert input, return position of unconvert value
-    //&p -> '+' or '-' or etc
-    printf("  mov rax, %ld\n", strtol(p, &p, 10));
-    */
-
     printf("  mov rax, %d\n", expect_number());
 
     while (!at_eof()) {
@@ -158,24 +152,6 @@ int main(int argc, char **argv){
         expect('-');
         printf("  sub rax, %d\n", expect_number());
     }
-
-    //while (*p) {
-    //    if (*p == '+') {
-    //        p++;
-    //        // Most likely, next value of unconverted value like '+' or '-' is convertable naumber value
-    //        printf("  add rax, %ld\n", strtol(p, &p, 10));
-    //        continue;
-    //    }
-
-    //    if (*p == '-') {
-    //        p++;
-    //        printf("  sub rax, %ld\n", strtol(p, &p, 10));
-    //        continue;
-    //    }
-
-    //    fprintf(stderr, "Unexpected String: '%c'\n", *p);
-    //    return 1;
-    //}
 
     printf("  ret\n");
     return 0;
