@@ -181,7 +181,7 @@ Node *unary();
 Node *primary();
 
 // expr = mul ("+" mul | "-" mul)*
-// The third priority
+// The Fouth priority
 Node *expr() {
     Node *node = mul();
      
@@ -196,7 +196,7 @@ Node *expr() {
 }
 
 // mul = mul ("*" primary | "/" primary)*
-// The Second priority
+// The Third priority
 Node *mul() {
     Node *node = unary();
 
@@ -210,6 +210,9 @@ Node *mul() {
     }
 }
 
+// unary = ("+" | "-")? unary
+//         | primary
+// The Second priority
 Node *unary() {
     if (consume('+'))
         return unary();
@@ -234,6 +237,7 @@ Node *primary() {
 // Code Generate Part
 // --------------------
 
+// Output assembly code by node->kind
 void gen(Node *node){
     if (node->kind == ND_NUM) {
         printf("  push %d\n", node->val);
