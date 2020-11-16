@@ -8,4 +8,4 @@ test: $(CompilerName)
 	./test.sh
 
 clean:
-	rm -r $(CompilerName)
+	rm -r $(CompilerName) *.s a.out tmp
