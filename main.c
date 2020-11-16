@@ -5,6 +5,10 @@
 #include <stdbool.h>
 #include <string.h>
 
+// ----------------------
+// Tokenizer
+// ----------------------
+
 //represent Inputed Token type
 typedef enum {
     TK_RESERVED, // Symbol
@@ -126,6 +130,11 @@ Token *tokenize() {
     return head.next;
 }
 
+// -------------------
+// Parser
+// -------------------
+
+// type of Parser
 typedef enum {
     ND_ADD, // +
     ND_SUB, // -
@@ -134,6 +143,7 @@ typedef enum {
     ND_NUM, // Integer
 } Nodekind;
 
+// AST node type
 typedef struct Node Node;
 
 struct Node {
@@ -145,7 +155,8 @@ struct Node {
 
 
 
-
+// Create New Node
+// return created new node
 Node *new_node(Nodekind kind, Node *left, Node *right) {
     Node *node = calloc(1, sizeof(Node));
     node->kind = kind;
@@ -154,6 +165,8 @@ Node *new_node(Nodekind kind, Node *left, Node *right) {
     return node;
 }
 
+// Create New node has integer
+// return created new node
 Node *new_node_num(int val){
     Node *node = calloc(1, sizeof(Node));
     node->kind = ND_NUM;
@@ -161,20 +174,28 @@ Node *new_node_num(int val){
     return node;
 }
 
+// prototype declare
 Node *expr();
 Node *mul();
 Node *primary();
 
-Node *primary() {
-    if (consume('(')) {
-        Node *node = expr();
-        expect(')');
-        return node;
+// expr = mul ("+" mul | "-" mul)*
+// The third priority
+Node *expr() {
+    Node *node = mul();
+     
+    for(;;) {
+        if (consume('+'))
+            node = new_node(ND_ADD, node, mul());
+        else if (consume('-'))
+            node = new_node(ND_SUB, node, mul());
+        else
+            return node;
     }
-
-    return new_node_num(expect_number());
 }
 
+// mul = mul ("*" primary | "/" primary)*
+// The Second priority
 Node *mul() {
     Node *node = primary();
 
@@ -188,18 +209,21 @@ Node *mul() {
     }
 }
 
-Node *expr() {
-    Node *node = mul();
-     
-    for(;;) {
-        if (consume('+'))
-            node = new_node(ND_ADD, node, mul());
-        else if (consume('-'))
-            node = new_node(ND_SUB, node, mul());
-        else
-            return node;
+// primary = "(" expr ")" | num
+// The First Priority
+Node *primary() {
+    if (consume('(')) {
+        Node *node = expr();
+        expect(')');
+        return node;
     }
+
+    return new_node_num(expect_number());
 }
+
+// --------------------
+// Code Generate Part
+// --------------------
 
 void gen(Node *node){
     if (node->kind == ND_NUM) {
@@ -232,36 +256,23 @@ void gen(Node *node){
     printf("  push rax\n");
 }
     
-
-
-
-
 int main(int argc, char **argv){
 
+    // Get user inputs
     user_input = argv[1];
 
+    // Tokenize inputs
     token = tokenize();
 
+    // Create AST using Tokenized Token by priority
     Node *node = expr();
 
 	printf(".intel_syntax noprefix\n");
 	printf(".globl main\n");
 	printf("main:\n");
 
+    // Output assembly code
     gen(node);
-
-
-    //printf("  mov rax, %d\n", expect_number());
-
-    //while (!at_eof()) {
-    //    if (consume('+')) {
-    //        printf("  add rax, %d\n", expect_number());
-    //        continue;
-    //    }
-
-    //    expect('-');
-    //    printf("  sub rax, %d\n", expect_number());
-    //}
 
     printf("  pop rax\n");
     printf("  ret\n");
