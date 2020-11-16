@@ -5,14 +5,6 @@
 #include <stdbool.h>
 #include <string.h>
 
-typedef enum {
-    ND_ADD, // +
-    ND_SUB, // -
-    ND_MUL, // *
-    ND_DIV, // /
-    ND_NUM, // Integer
-} Nodekind;
-
 //represent Inputed Token type
 typedef enum {
     TK_RESERVED, // Symbol
@@ -23,14 +15,6 @@ typedef enum {
 
 typedef struct Token Token;
 
-typedef struct Node Node;
-
-struct Node {
-    Nodekind kind;
-    Node *right;
-    Node *left;
-    int val;
-};
 
 // Token Type struct
 struct Token {
@@ -40,10 +24,11 @@ struct Token {
     char *str; // String of token
 };
 
+char *user_input;
+
 // declare Token practical used
 Token *token;
 
-char *user_input;
 
 // Func of report error
 void error_at(char *loc, char *fmt, ...) {
@@ -77,13 +62,91 @@ void expect(char op) {
     token = token->next;
 }
 
-Node *expr();
-Node *mul();
-Node *primary();
+// Check of whether token value is integer
+// if so, store the integer value to token val value and return it
+// if so, token value was changed to Next token value
+int expect_number() {
+    if (token->kind != TK_NUM)
+        error_at(token->str, "Not integer value");
+    int val = token->val;
+    token = token->next;
+    return val;
+}
+
+// Check of whether token value is EOF
+bool at_eof(){
+    return token->kind == TK_EOF;
+}
+
+// Create New Token and bind Next linked List
+Token *new_token(TokenKind kind, Token *cur, char *str) {
+    Token *tok = calloc(1, sizeof(Token));
+    tok->kind = kind;
+    tok->str = str;
+    cur->next = tok;
+    return tok;
+}
+
+// Tokenize inputed string p 
+// if p is space, skip
+// if p is symbol, create new token and consume configured process
+// if p is integer or digit, create new token and store value
+// if p is EOF, return last Linked list head
+Token *tokenize() {
+    char *p = user_input;
+    Token head;
+    head.next = NULL;
+    Token *cur = &head;
+
+    while (*p) {
+        if (isspace(*p)) {
+            p++;
+            continue;
+        }
+
+        if (strchr("+-*/()", *p)){
+            cur = new_token(TK_RESERVED, cur, p++);
+            continue;
+        }
+
+        //strtol : convert input to value
+        //p -> Decimal number value (10)
+        //if strtol couldn't convert input, return position of unconvert value
+        //&p -> '+' or '-' or etc
+        if (isdigit(*p)) {
+            cur = new_token(TK_NUM, cur, p);
+            cur->val = strtol(p, &p, 10);
+            continue;
+        }
+
+        error_at(p, "Unable to tokenize");
+    }
+
+    new_token(TK_EOF, cur, p);
+    return head.next;
+}
+
+typedef enum {
+    ND_ADD, // +
+    ND_SUB, // -
+    ND_MUL, // *
+    ND_DIV, // /
+    ND_NUM, // Integer
+} Nodekind;
+
+typedef struct Node Node;
+
+struct Node {
+    Nodekind kind;
+    Node *right;
+    Node *left;
+    int val;
+};
 
 
 
-Node *new_node(Nodekind kind, Node *right, Node *left) {
+
+Node *new_node(Nodekind kind, Node *left, Node *right) {
     Node *node = calloc(1, sizeof(Node));
     node->kind = kind;
     node->right = right;
@@ -97,6 +160,10 @@ Node *new_node_num(int val){
     node->val = val;
     return node;
 }
+
+Node *expr();
+Node *mul();
+Node *primary();
 
 Node *primary() {
     if (consume('(')) {
@@ -166,69 +233,8 @@ void gen(Node *node){
 }
     
 
-// Check of whether token value is integer
-// if so, store the integer value to token val value and return it
-// if so, token value was changed to Next token value
-int expect_number() {
-    if (token->kind != TK_NUM)
-        error_at(token->str, "Not integer value");
-    int val = token->val;
-    token = token->next;
-    return val;
-}
 
-// Check of whether token value is EOF
-bool at_eof(){
-    return token->kind == TK_EOF;
-}
 
-// Create New Token and bind Next linked List
-Token *new_token(TokenKind kind, Token *cur, char *str) {
-    Token *tok = calloc(1, sizeof(Token));
-    tok->kind = kind;
-    tok->str = str;
-    cur->next = tok;
-    return tok;
-}
-
-// Tokenize inputed string p 
-// if p is space, skip
-// if p is symbol, create new token and consume configured process
-// if p is integer or digit, create new token and store value
-// if p is EOF, return last Linked list head
-Token *tokenize() {
-    char *p = user_input;
-    Token head;
-    head.next = NULL;
-    Token *cur = &head;
-
-    while (*p) {
-        if (isspace(*p)) {
-            p++;
-            continue;
-        }
-
-        if (strchr("+-*/()", *p)){
-            cur = new_token(TK_RESERVED, cur, p++);
-            continue;
-        }
-
-        //strtol : convert input to value
-        //p -> Decimal number value (10)
-        //if strtol couldn't convert input, return position of unconvert value
-        //&p -> '+' or '-' or etc
-        if (isdigit(*p)) {
-            cur = new_token(TK_NUM, cur, p);
-            cur->val = strtol(p, &p, 10);
-            continue;
-        }
-
-        error_at(p, "Unable to tokenize");
-    }
-
-    new_token(TK_EOF, cur, p);
-    return head.next;
-}
 
 int main(int argc, char **argv){
 
