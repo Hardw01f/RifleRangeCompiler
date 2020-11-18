@@ -93,6 +93,7 @@ Token *new_token(TokenKind kind, Token *cur, char *str, int len) {
     return tok;
 }
 
+// check strings on Tokenize
 bool startswitch(char *p, char *q) {
     return memcmp(p, q, strlen(q)) == 0;
 }
@@ -109,17 +110,20 @@ Token *tokenize() {
     Token *cur = &head;
 
     while (*p) {
+        // space is Skip
         if (isspace(*p)) {
             p++;
             continue;
         }
 
+        // Token is 2 digits operater, create New Token
         if (startswitch(p, "==") || startswitch(p, "!=") || startswitch(p, "<=") || startswitch(p, ">=")) {
             cur = new_token(TK_RESERVED, cur, p, 2);
             p += 2;
             continue;
         }
 
+        // Token is single digit operater, create New Token
         if (strchr("+-*/()<>", *p)){
             cur = new_token(TK_RESERVED, cur, p++, 1);
             continue;
@@ -129,6 +133,7 @@ Token *tokenize() {
         //p -> Decimal number value (10)
         //if strtol couldn't convert input, return position of unconvert value
         //&p -> '+' or '-' or etc
+        //arg is 0, that's why digits values length is unknown, so calculate and store it
         if (isdigit(*p)) {
             cur = new_token(TK_NUM, cur, p, 0);
             char *q = p;
@@ -202,12 +207,13 @@ Node *unary();
 Node *primary();
 
 // expr = mul ("+" mul | "-" mul)*
-// The Fouth priority
+// The Seventh priority
 Node *expr() {
     return equality();
 }
 
-
+// equality   = relational ( "==" relational | "!=" relational )*
+// The Sixth priority
 Node *equality() {
     Node *node = relational();
 
@@ -221,6 +227,8 @@ Node *equality() {
     }
 }
 
+// relational = add ( "<" add | "<=" add | ">" add | ">=" add)*
+// The Fifth priority
 Node *relational() {
     Node *node = add();
 
@@ -238,6 +246,8 @@ Node *relational() {
     }
 }
 
+// add = mul ("+" mul | "-" mul)*
+// The Fouth priority
 Node *add() {
     Node *node = mul();
      
@@ -251,7 +261,7 @@ Node *add() {
     }
 }
 
-// mul = mul ("*" primary | "/" primary)*
+// mul = unary ("*" unary | "/" unary)*
 // The Third priority
 Node *mul() {
     Node *node = unary();
@@ -277,7 +287,7 @@ Node *unary() {
     return primary();
 }
 
-// primary = "(" expr ")" | num
+// primary = num | "(" expr ")"
 // The First Priority
 Node *primary() {
     if (consume("(")) {
