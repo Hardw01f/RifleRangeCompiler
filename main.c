@@ -1,9 +1,4 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <ctype.h>
-#include <stdarg.h>
-#include <stdbool.h>
-#include <string.h>
+#include "main.h"
 
 // ----------------------
 // Tokenizer
@@ -11,9 +6,9 @@
 
 //represent Inputed Token type
 typedef enum {
-    TK_RESERVED, // Symbol
-    TK_NUM, //Integer number
-    TK_EOF, //End of Token
+    tk_reserved, // symbol
+    tk_num, //integer number
+    tk_eof, //end of token
 } TokenKind;
 
 
@@ -21,13 +16,13 @@ typedef struct Token Token;
 
 
 // Token Type struct
-struct Token {
-    TokenKind kind; // Token type
-    Token *next; // Next inputed token
-    int val; // if kind is TK_NUM, the value
-    char *str; // String of token
-    int len; // Length of Token
-};
+//struct Token {
+//    TokenKind kind; // Token type
+//    Token *next; // Next inputed token
+//    int val; // if kind is TK_NUM, the value
+//    char *str; // String of token
+//    int len; // Length of Token
+//};
 
 char *user_input;
 
@@ -84,7 +79,7 @@ bool at_eof(){
 }
 
 // Create New Token and bind Next linked List
-Token *new_token(TokenKind kind, Token *cur, char *str, int len) {
+Token *new_token(enum TokenKind kind, struct Token *cur, char *str, int len) {
     Token *tok = calloc(1, sizeof(Token));
     tok->kind = kind;
     tok->str = str;
@@ -154,33 +149,33 @@ Token *tokenize() {
 // -------------------
 
 // type of Parser
-typedef enum {
-    ND_ADD, // +
-    ND_SUB, // -
-    ND_MUL, // *
-    ND_DIV, // /
-    ND_EQ,  // ==
-    ND_NE,  // !=
-    ND_LT,  // <
-    ND_LE,  // <=
-    ND_NUM, // Integer
-} Nodekind;
+//typedef enum {
+//    ND_ADD, // +
+//    ND_SUB, // -
+//    ND_MUL, // *
+//    ND_DIV, // /
+//    ND_EQ,  // ==
+//    ND_NE,  // !=
+//    ND_LT,  // <
+//    ND_LE,  // <=
+//    ND_NUM, // Integer
+//} Nodekind;
 
 // AST node type
 typedef struct Node Node;
 
-struct Node {
-    Nodekind kind;
-    Node *right;
-    Node *left;
-    int val;
-};
+//struct Node {
+//    Nodekind kind;
+//    Node *right;
+//    Node *left;
+//    int val;
+//};
 
 
 
 // Create New Node
 // return created new node
-Node *new_node(Nodekind kind, Node *left, Node *right) {
+Node *new_node(enum Nodekind kind, Node *left, Node *right) {
     Node *node = calloc(1, sizeof(Node));
     node->kind = kind;
     node->right = right;
