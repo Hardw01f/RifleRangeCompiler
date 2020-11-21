@@ -14,16 +14,6 @@ typedef enum {
 
 typedef struct Token Token;
 
-
-// Token Type struct
-//struct Token {
-//    TokenKind kind; // Token type
-//    Token *next; // Next inputed token
-//    int val; // if kind is TK_NUM, the value
-//    char *str; // String of token
-//    int len; // Length of Token
-//};
-
 char *user_input;
 
 // declare Token practical used
@@ -148,30 +138,8 @@ Token *tokenize() {
 // Parser
 // -------------------
 
-// type of Parser
-//typedef enum {
-//    ND_ADD, // +
-//    ND_SUB, // -
-//    ND_MUL, // *
-//    ND_DIV, // /
-//    ND_EQ,  // ==
-//    ND_NE,  // !=
-//    ND_LT,  // <
-//    ND_LE,  // <=
-//    ND_NUM, // Integer
-//} Nodekind;
-
 // AST node type
 typedef struct Node Node;
-
-//struct Node {
-//    Nodekind kind;
-//    Node *right;
-//    Node *left;
-//    int val;
-//};
-
-
 
 // Create New Node
 // return created new node
